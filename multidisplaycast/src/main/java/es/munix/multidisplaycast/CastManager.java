@@ -137,17 +137,16 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     }
 
     public void registerForActivity( Activity activity, Menu menu, int menuId ) {
-        if ( this.activity == null ) {
-            log( "registerForActivity" );
-            this.activity = activity;
-            castMenuItem = menu.findItem( menuId );
-            castMenuItem.setIcon( R.drawable.cast_off );
-            castMenuItem.setOnMenuItemClickListener( this );
-            calculateMenuVisibility();
-        }
+        log( "registerForActivity" );
+        this.activity = activity;
+        castMenuItem = menu.findItem( menuId );
+        castMenuItem.setIcon( R.drawable.cast_off );
+        castMenuItem.setOnMenuItemClickListener( this );
+        calculateMenuVisibility();
     }
 
     public void setCastMenuVisible( Boolean visible ) {
+        log( "setCastMenuVisible castMenuItem != null " + ( castMenuItem != null ) );
         if ( castMenuItem != null ) {
             castMenuItem.setVisible( visible );
         }
@@ -487,6 +486,9 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     private void calculateMenuVisibility() {
         if ( discoveryManager != null ) {
             setCastMenuVisible( discoveryManager.getAllDevices().size() > 0 );
+            if ( isConnected() ) {
+                castMenuItem.setIcon( R.drawable.cast_on );
+            }
         }
     }
 
