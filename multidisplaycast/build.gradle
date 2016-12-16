@@ -50,5 +50,5 @@ dependencies {
 
     compile rootProject.ext.glide
     compile rootProject.ext.gson
-    compile rootProject.ext.munixUtilis
+    compile rootProject.ext.munixUtilities
 }
