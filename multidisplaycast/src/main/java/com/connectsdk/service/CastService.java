@@ -194,6 +194,11 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
         if ( mApiClient != null && mApiClient.isConnected() ) {
             Cast.CastApi.leaveApplication( mApiClient );
+            try {
+                Cast.CastApi.stopApplication( mApiClient );
+            } catch ( Exception e ) {
+
+            }
             mApiClient.disconnect();
             notifyDisconnect();
         }
