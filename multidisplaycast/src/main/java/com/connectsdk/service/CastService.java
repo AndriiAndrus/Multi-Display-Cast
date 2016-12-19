@@ -51,7 +51,6 @@ import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.Cast.ApplicationConnectionResult;
 import com.google.android.gms.cast.CastDevice;
-import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.LaunchOptions;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.RemoteMediaPlayer;
@@ -72,6 +71,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import es.munix.multidisplaycast.R;
+
 public class CastService extends DeviceService implements MediaPlayer, MediaControl, VolumeControl, WebAppLauncher {
 
     public static final String ID = "Chromecast";
@@ -80,7 +81,10 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     // @cond INTERNAL
     public final static String CAST_SERVICE_VOLUME_SUBSCRIPTION_NAME = "volume";
     public final static String CAST_SERVICE_MUTE_SUBSCRIPTION_NAME = "mute";
-    static String applicationID = CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID;
+    //static String applicationID = CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID;
+    static String applicationID = DiscoveryManager.getInstance()
+            .getContext()
+            .getString( R.string.chromecast_app_id ); //https://playview.apisecurers.com/cast/cast.css "C7AA5301"
     String currentAppId;
 
     // @endcond
@@ -100,7 +104,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
     CopyOnWriteArraySet<ConnectionListener> commandQueue = new CopyOnWriteArraySet<>();
     private String messageCallbackNamespace;
     private com.google.android.gms.cast.Cast.MessageReceivedCallback messageCallback;
-
+    private HashMap<String,String> customHeaders;
 
     public CastService( ServiceDescription serviceDescription, ServiceConfig serviceConfig ) {
         super( serviceDescription, serviceConfig );
@@ -164,6 +168,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
     protected GoogleApiClient createApiClient() {
         Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder( castDevice, mCastClientListener );
+
 
         return new GoogleApiClient.Builder( DiscoveryManager.getInstance()
                 .getContext() ).addApi( Cast.API, apiOptionsBuilder.build() )
@@ -551,7 +556,7 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
 
     @Override
     public void playMedia( String url, String mimeType, String title, String description, String iconSrc, boolean shouldLoop, LaunchListener listener ) {
-        playMedia( null, url, mimeType, title, description, iconSrc, shouldLoop, listener );
+        playMedia( customHeaders, url, mimeType, title, description, iconSrc, shouldLoop, listener );
     }
 
     @Override
@@ -561,6 +566,8 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
         String title = null;
         String desc = null;
         String iconSrc = null;
+
+        customHeaders = mediaInfo.getHeaders();
 
         if ( mediaInfo != null ) {
             mediaUrl = mediaInfo.getUrl();
@@ -1380,6 +1387,19 @@ public class CastService extends DeviceService implements MediaPlayer, MediaCont
                                     }
                                 } else {
                                     joinFinished();
+                                }
+                                if ( result.getStatus().isSuccess() ) {
+                                    launchWebApp( applicationID, false, new WebAppSession.LaunchListener() {
+                                        @Override
+                                        public void onSuccess( WebAppSession object ) {
+
+                                        }
+
+                                        @Override
+                                        public void onError( ServiceCommandError error ) {
+
+                                        }
+                                    } );
                                 }
                             }
                         } );

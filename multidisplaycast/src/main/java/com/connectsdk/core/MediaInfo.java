@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -39,6 +40,7 @@ public class MediaInfo {
     private String mimeType;
     private String description;
     private String title;
+    private HashMap<String,String> headers;
 
     /**
      * list of imageInfo objects where [0] is icon, [1] is poster
@@ -56,6 +58,7 @@ public class MediaInfo {
         description = builder.description;
         subtitleInfo = builder.subtitleInfo;
         allImages = builder.allImages;
+        headers = builder.headers;
     }
 
     /**
@@ -122,6 +125,10 @@ public class MediaInfo {
     @Deprecated
     public void setTitle( String title ) {
         this.title = title;
+    }
+
+    public HashMap<String,String> getHeaders() {
+        return headers;
     }
 
     /**
@@ -216,7 +223,7 @@ public class MediaInfo {
         // required parameters
         private String url;
         private String mimeType;
-
+        private HashMap<String,String> headers;
         // optional parameters
         private String title;
         private String description;
@@ -245,6 +252,11 @@ public class MediaInfo {
                 createImagesList();
                 allImages.set( 0, new ImageInfo( iconUrl ) );
             }
+            return this;
+        }
+
+        public Builder setHeaders( HashMap<String,String> headers ) {
+            this.headers = headers;
             return this;
         }
 
