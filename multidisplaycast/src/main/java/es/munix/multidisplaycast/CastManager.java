@@ -323,7 +323,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     }
 
     public void playMedia( final String url, final String mimeType, final String title, final String subtitle, final String icon ) {
-        playMedia( url, mimeType, title, subtitle, icon );
+        playMedia( null, url, mimeType, title, subtitle, icon );
     }
 
     public void playMedia( HashMap<String,String> headers, final String url, final String mimeType, final String title, final String subtitle, final String icon ) {
