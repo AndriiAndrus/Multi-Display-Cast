@@ -12,6 +12,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.munix.utilities.SimpleToast;
 import com.munix.utilities.Views;
 
 import es.munix.multidisplaycast.interfaces.CastListener;
@@ -182,6 +183,11 @@ public class CastControlsActivity extends AppCompatActivity implements CastListe
                 play.setImageResource( R.drawable.ic_pause_white_36dp );
                 break;
 
+            case STATUS_FORMAT_NOT_ALLOWED:
+                SimpleToast.showShort( "Contenido no compatible" );
+                finish();
+                break;
+
             case STATUS_FINISHED:
             case STATUS_STOPPED:
                 finish();
@@ -191,7 +197,7 @@ public class CastControlsActivity extends AppCompatActivity implements CastListe
                 play.setImageResource( R.drawable.ic_play_arrow_white_36dp );
                 break;
 
-            case STATUS_NOT_SUPPORT_LISTENER:
+            case STATUS_CAPABILITY_NOT_SUPPORTED:
                 if ( loader.getVisibility() == View.VISIBLE ) {
                     Views.disappear( loader, 300 );
                 }

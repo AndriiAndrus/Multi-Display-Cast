@@ -17,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.connectsdk.core.MediaInfo;
@@ -81,7 +80,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     private AlertDialog pairingCodeDialog;
     private AlertDialog disconnectDialog;
 
-    //Listeners no implemetables
+    //Listeners no implementables
     private MediaControl.DurationListener durationListener;
     private MediaControl.PositionListener positionListener;
 
@@ -90,6 +89,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     private long totalDuration = -1;
     private long currentPosition = 0;
     private MediaObject mediaObject;
+    private HashMap<String,String> headers;
 
 
     public static CastManager getInstance() {
@@ -137,6 +137,10 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
 
     public void setPlayStatusListener( String tag, PlayStatusListener listener ) {
         this.playStatusListeners.put( tag, listener );
+    }
+
+    public HashMap<String,String> getHeaders() {
+        return headers;
     }
 
     public void unsetCastListener( String tag ) {
@@ -329,6 +333,8 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     public void playMedia( HashMap<String,String> headers, final String url, final String mimeType, final String title, final String subtitle, final String icon ) {
         if ( isConnected() ) {
 
+            this.headers = headers;
+
             MediaInfo mediaInfo = new MediaInfo.Builder( url, mimeType ).setTitle( title )
                     .setDescription( subtitle ).setHeaders( headers )
                     .setIcon( icon )
@@ -421,11 +427,11 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
                             for ( Map.Entry<String,PlayStatusListener> playStatusListener : playStatusListeners
                                     .entrySet() ) {
                                 playStatusListener.getValue()
-                                        .onPlayStatusChanged( PlayStatusListener.STATUS_NOT_SUPPORT_LISTENER );
+                                        .onPlayStatusChanged( PlayStatusListener.STATUS_FORMAT_NOT_ALLOWED );
                             }
                             stop();
-                            Toast.makeText( getActivity(), "Contenido no compatible", Toast.LENGTH_LONG )
-                                    .show();
+                            /*Toast.makeText( getActivity(), "Contenido no compatible", Toast.LENGTH_LONG )
+                                    .show();*/
                         }
                     } );
         }
@@ -656,13 +662,13 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
                     mMediaControl.getPosition( positionListener );
                     mMediaControl.getDuration( durationListener );
                 } catch ( Exception e ) {
-                    sendNotSupportGetStatus();
+                    sendNotSupportCapability();
                 }
             }
         }, 0, TimeUnit.SECONDS.toMillis( 1 ) );
     }
 
-    private void sendNotSupportGetStatus() {
+    private void sendNotSupportCapability() {
         if ( playStatusListeners.size() > 0 ) {
             if ( mediaObject != null ) {
                 mediaObject.setIsSeekable( false );
@@ -672,7 +678,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
                         for ( Map.Entry<String,PlayStatusListener> playStatusListener : playStatusListeners
                                 .entrySet() ) {
                             playStatusListener.getValue()
-                                    .onPlayStatusChanged( PlayStatusListener.STATUS_NOT_SUPPORT_LISTENER );
+                                    .onPlayStatusChanged( PlayStatusListener.STATUS_CAPABILITY_NOT_SUPPORTED );
                         }
                     }
                 } );
@@ -735,7 +741,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
 
             @Override
             public void onError( ServiceCommandError error ) {
-                sendNotSupportGetStatus();
+                sendNotSupportCapability();
             }
 
             @Override
@@ -748,7 +754,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
 
             @Override
             public void onError( ServiceCommandError error ) {
-                sendNotSupportGetStatus();
+                sendNotSupportCapability();
             }
 
             @Override
