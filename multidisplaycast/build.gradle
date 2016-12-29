@@ -9,7 +9,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 19
         versionCode 3
-        versionName "2.01"
+        versionName "2.02"
         /**
          *  ConnectSDK Version
          *  android:versionCode="12"
