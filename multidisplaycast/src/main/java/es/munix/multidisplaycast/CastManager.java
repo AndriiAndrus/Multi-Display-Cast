@@ -219,34 +219,40 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     }
 
     private void showDisconnectAlert( String title, final String disconnectLabel, String image ) {
-        View customView = View.inflate( getActivity(), R.layout.cast_disconnect, null );
-        final TextView deviceName = (TextView) customView.findViewById( R.id.deviceName );
-        if ( connectableDevice.getFriendlyName() != null ) {
-            deviceName.setText( connectableDevice.getFriendlyName() );
-        } else {
-            deviceName.setText( connectableDevice.getModelName() );
+        if ( getActivity() != null && !getActivity().isFinishing() ) {
+            try {
+                View customView = View.inflate( getActivity(), R.layout.cast_disconnect, null );
+                final TextView deviceName = (TextView) customView.findViewById( R.id.deviceName );
+                if ( connectableDevice.getFriendlyName() != null ) {
+                    deviceName.setText( connectableDevice.getFriendlyName() );
+                } else {
+                    deviceName.setText( connectableDevice.getModelName() );
+                }
+
+                final TextView mediaTitle = (TextView) customView.findViewById( R.id.mediaTitle );
+                mediaTitle.setText( title );
+
+                final ImageView mediaImage = (ImageView) customView.findViewById( R.id.mediaImage );
+                if ( image != null ) {
+                    Glide.with( getActivity() ).load( image ).into( mediaImage );
+                } else {
+                    mediaImage.setVisibility( View.GONE );
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() ).setView( customView )
+                        .setPositiveButton( disconnectLabel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick( DialogInterface dialogInterface, int i ) {
+                                dialogInterface.cancel();
+                                disconnect();
+                            }
+                        } );
+                disconnectDialog = builder.create();
+                disconnectDialog.show();
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
         }
-
-        final TextView mediaTitle = (TextView) customView.findViewById( R.id.mediaTitle );
-        mediaTitle.setText( title );
-
-        final ImageView mediaImage = (ImageView) customView.findViewById( R.id.mediaImage );
-        if ( image != null ) {
-            Glide.with( getActivity() ).load( image ).into( mediaImage );
-        } else {
-            mediaImage.setVisibility( View.GONE );
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() ).setView( customView )
-                .setPositiveButton( disconnectLabel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick( DialogInterface dialogInterface, int i ) {
-                        dialogInterface.cancel();
-                        disconnect();
-                    }
-                } );
-        disconnectDialog = builder.create();
-        disconnectDialog.show();
     }
 
     public MediaObject getMediaObject() {
