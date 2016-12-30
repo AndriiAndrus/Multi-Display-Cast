@@ -161,7 +161,11 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     }
 
     private Activity getActivity() {
-        return activityWeakReference.get();
+        if ( activityWeakReference != null ) {
+            return activityWeakReference.get();
+        } else {
+            return null;
+        }
     }
 
     public void setCastMenuVisible( Boolean visible ) {
@@ -274,60 +278,62 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
                 showDisconnectAlert( "No se está reproduciendo contenido", "Desconectar", null );
             }
         } else {
-            final DevicePicker devicePicker = new DevicePicker( getActivity() );
-            connectToCastDialog = devicePicker.getPickerDialog( "Selecciona dispositivo", new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick( AdapterView<?> adapterView, View view, int i, long l ) {
-                    connectToCastDialog.cancel();
-                    connectableDevice = (ConnectableDevice) adapterView.getItemAtPosition( i );
-                    connectableDevice.addListener( CastManager.this );
-                    connectableDevice.connect();
-                }
-            } );
-            connectToCastDialog.show();
+            if ( getActivity() != null ) {
+                final DevicePicker devicePicker = new DevicePicker( getActivity() );
+                connectToCastDialog = devicePicker.getPickerDialog( "Selecciona dispositivo", new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick( AdapterView<?> adapterView, View view, int i, long l ) {
+                        connectToCastDialog.cancel();
+                        connectableDevice = (ConnectableDevice) adapterView.getItemAtPosition( i );
+                        connectableDevice.addListener( CastManager.this );
+                        connectableDevice.connect();
+                    }
+                } );
+                connectToCastDialog.show();
 
-            pairingAlertDialog = new AlertDialog.Builder( getActivity() ).setTitle( "Conectando con su TV" )
-                    .setMessage( "Confirme la conexión con su TV" )
-                    .setPositiveButton( "Aceptar", null )
-                    .setNegativeButton( "Cancelar", new DialogInterface.OnClickListener() {
+                pairingAlertDialog = new AlertDialog.Builder( getActivity() ).setTitle( "Conectando con su TV" )
+                        .setMessage( "Confirme la conexión con su TV" )
+                        .setPositiveButton( "Aceptar", null )
+                        .setNegativeButton( "Cancelar", new DialogInterface.OnClickListener() {
 
-                        @Override
-                        public void onClick( DialogInterface dialog, int which ) {
-                            devicePicker.cancelPicker();
-                            connectToCastDialog.show();
-                        }
-                    } )
-                    .create();
+                            @Override
+                            public void onClick( DialogInterface dialog, int which ) {
+                                devicePicker.cancelPicker();
+                                connectToCastDialog.show();
+                            }
+                        } )
+                        .create();
 
-            View v = View.inflate( getActivity(), R.layout.input_code_dialog, null );
-            final EditText input = (EditText) v.findViewById( R.id.input );
-            input.setMaxLines( 1 );
+                View v = View.inflate( getActivity(), R.layout.input_code_dialog, null );
+                final EditText input = (EditText) v.findViewById( R.id.input );
+                input.setMaxLines( 1 );
 
 
-            final InputMethodManager imm = (InputMethodManager) getActivity().getApplicationContext()
-                    .getSystemService( Context.INPUT_METHOD_SERVICE );
+                final InputMethodManager imm = (InputMethodManager) getActivity().getApplicationContext()
+                        .getSystemService( Context.INPUT_METHOD_SERVICE );
 
-            pairingCodeDialog = new AlertDialog.Builder( getActivity() ).setTitle( "Ingrese el código que ve en la TV" )
-                    .setView( v )
-                    .setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick( DialogInterface arg0, int arg1 ) {
-                            if ( connectableDevice != null ) {
-                                String value = input.getText().toString().trim();
-                                connectableDevice.sendPairingKey( value );
+                pairingCodeDialog = new AlertDialog.Builder( getActivity() ).setTitle( "Ingrese el código que ve en la TV" )
+                        .setView( v )
+                        .setPositiveButton( android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick( DialogInterface arg0, int arg1 ) {
+                                if ( connectableDevice != null ) {
+                                    String value = input.getText().toString().trim();
+                                    connectableDevice.sendPairingKey( value );
+                                    imm.hideSoftInputFromWindow( input.getWindowToken(), 0 );
+                                }
+                            }
+                        } )
+                        .setNegativeButton( android.R.string.cancel, new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick( DialogInterface dialog, int whichButton ) {
+                                devicePicker.cancelPicker();
                                 imm.hideSoftInputFromWindow( input.getWindowToken(), 0 );
                             }
-                        }
-                    } )
-                    .setNegativeButton( android.R.string.cancel, new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick( DialogInterface dialog, int whichButton ) {
-                            devicePicker.cancelPicker();
-                            imm.hideSoftInputFromWindow( input.getWindowToken(), 0 );
-                        }
-                    } )
-                    .create();
+                        } )
+                        .create();
+            }
         }
         return false;
     }
@@ -529,13 +535,16 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     }
 
     public void stop() {
-        if ( isConnected() && mMediaControl != null ) {
-            stopUpdating();
-            mMediaControl.stop( null );
-        } else {
-            NotificationsHelper.cancelNotification( context.getApplicationContext() );
+        try {
+            if ( isConnected() && mMediaControl != null ) {
+                stopUpdating();
+                mMediaControl.stop( null );
+            } else {
+                NotificationsHelper.cancelNotification( context.getApplicationContext() );
+            }
+            unsetMediaControl();
+        } catch ( Exception e ) {
         }
-        unsetMediaControl();
     }
 
     public Boolean isConnected() {
