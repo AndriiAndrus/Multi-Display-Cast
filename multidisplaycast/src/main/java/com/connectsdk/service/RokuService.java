@@ -61,6 +61,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -81,6 +82,7 @@ public class RokuService extends DeviceService implements Launcher, MediaPlayer,
     }
 
     DIALService dialService;
+    private HashMap<String,String> customHeaders;
 
     public RokuService( ServiceDescription serviceDescription, ServiceConfig serviceConfig ) {
         super( serviceDescription, serviceConfig );
@@ -604,7 +606,7 @@ public class RokuService extends DeviceService implements Launcher, MediaPlayer,
         return null;
     }
 
-    private void displayMedia( String url, String mimeType, String title, String description, String iconSrc, final MediaPlayer.LaunchListener listener ) {
+    private void displayMedia( HashMap<String,String> headers, String url, String mimeType, String title, String description, String iconSrc, final MediaPlayer.LaunchListener listener ) {
         ResponseListener<Object> responseListener = new ResponseListener<Object>() {
 
             @Override
@@ -620,6 +622,10 @@ public class RokuService extends DeviceService implements Launcher, MediaPlayer,
                 Util.postError( listener, error );
             }
         };
+
+        if ( headers != null && headers.containsKey( "BigPicture" ) ) {
+            iconSrc = headers.get( "BigPicture" );
+        }
 
         String action = "input";
         String mediaFormat = mimeType;
@@ -651,7 +657,7 @@ public class RokuService extends DeviceService implements Launcher, MediaPlayer,
 
     @Override
     public void displayImage( String url, String mimeType, String title, String description, String iconSrc, MediaPlayer.LaunchListener listener ) {
-        displayMedia( url, mimeType, title, description, iconSrc, listener );
+        displayMedia( customHeaders, url, mimeType, title, description, iconSrc, listener );
     }
 
     @Override
@@ -679,7 +685,7 @@ public class RokuService extends DeviceService implements Launcher, MediaPlayer,
 
     @Override
     public void playMedia( String url, String mimeType, String title, String description, String iconSrc, boolean shouldLoop, MediaPlayer.LaunchListener listener ) {
-        displayMedia( url, mimeType, title, description, iconSrc, listener );
+        displayMedia( customHeaders, url, mimeType, title, description, iconSrc, listener );
     }
 
     @Override
@@ -689,6 +695,8 @@ public class RokuService extends DeviceService implements Launcher, MediaPlayer,
         String title = null;
         String desc = null;
         String iconSrc = null;
+
+        customHeaders = mediaInfo.getHeaders();
 
         if ( mediaInfo != null ) {
             mediaUrl = mediaInfo.getUrl();

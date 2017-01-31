@@ -91,9 +91,6 @@ public class MainActivity extends AppCompatActivity implements CastListener, Pla
             case STATUS_PAUSED:
                 videoButton.setText( "Reanudar video" );
                 break;
-
-            case STATUS_NOT_SUPPORT_LISTENER:
-                break;
         }
     }
 
