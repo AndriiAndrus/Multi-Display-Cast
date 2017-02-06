@@ -33,7 +33,6 @@ import com.connectsdk.service.capability.VolumeControl;
 import com.connectsdk.service.capability.listeners.ResponseListener;
 import com.connectsdk.service.command.ServiceCommandError;
 
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     private Boolean statusStartPlayingFired = false;
 
     //Unset at destroy
-    private WeakReference<Activity> activityWeakReference;
+    private Activity activity;
 
     //Dialogos
     private AlertDialog connectToCastDialog;
@@ -153,7 +152,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
 
     public void registerForActivity( Activity activity, Menu menu, int menuId ) {
         log( "registerForActivity" );
-        activityWeakReference = new WeakReference<Activity>( activity );
+        this.activity = activity;
         castMenuItem = menu.findItem( menuId );
         castMenuItem.setIcon( R.drawable.cast_off );
         castMenuItem.setOnMenuItemClickListener( this );
@@ -161,11 +160,7 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
     }
 
     private Activity getActivity() {
-        if ( activityWeakReference != null ) {
-            return activityWeakReference.get();
-        } else {
-            return null;
-        }
+        return activity;
     }
 
     public void setCastMenuVisible( Boolean visible ) {
@@ -348,7 +343,8 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
             this.headers = headers;
 
             MediaInfo mediaInfo = new MediaInfo.Builder( url, mimeType ).setTitle( title )
-                    .setDescription( subtitle ).setHeaders( headers )
+                    .setDescription( subtitle )
+                    .setHeaders( headers )
                     .setIcon( icon )
                     .build();
 
@@ -650,12 +646,6 @@ public class CastManager implements DiscoveryManagerListener, MenuItem.OnMenuIte
 
         castListeners.clear();
         playStatusListeners.clear();
-        try {
-            activityWeakReference.clear();
-            activityWeakReference = null;
-        } catch ( Exception e ) {
-            //untested
-        }
     }
 
     private void stopUpdating() {
