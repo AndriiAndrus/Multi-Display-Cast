@@ -39,21 +39,21 @@
 
         <TextView
             android:id="@+id/title"
-            style="@style/Widget.MediaRouter.ChooserText.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#212121"
+            android:textSize="16sp"
             tools:text="Title"/>
 
         <TextView
             android:id="@+id/subtitle"
-            style="@style/Widget.MediaRouter.ChooserText.Secondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/title"
             android:layout_alignStart="@+id/title"
             android:layout_below="@+id/title"
             android:textColor="#616161"
+            android:textSize="14sp"
             tools:text="Subtitle"/>
     </RelativeLayout>
 </RelativeLayout>
