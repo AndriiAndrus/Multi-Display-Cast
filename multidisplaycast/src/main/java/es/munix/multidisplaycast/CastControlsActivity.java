@@ -138,6 +138,17 @@ public class CastControlsActivity extends AppCompatActivity implements CastListe
     }
 
     @Override
+    protected void onDestroy() {
+        if ( streamSeekBar != null ) {
+            streamSeekBar.setOnSeekBarChangeListener( null );
+        }
+        if ( volumeBarControl != null ) {
+            volumeBarControl.setOnSeekBarChangeListener( null );
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onOptionsItemSelected( MenuItem item ) {
         if ( item.getItemId() == android.R.id.home ) {
             finish();
